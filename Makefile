@@ -8,7 +8,7 @@
 HEREIAM     = $(shell pwd)
 REMOTEHOST  = 192.0.2.1
 HOMEDOTSSH := ~/.ssh
-SSHPUBKEYS := authorized_keys
+SSHPUBKEYS := SSH-PUBLIC-KEYS
 SSHKEYLIST := ssh.ak-iphone6-rsa.pub \
 			  ssh.ak-macbookair2011-rsa.pub \
 			  ssh.cr-iphone6-rsa.pub \
@@ -23,13 +23,13 @@ REPOS_TARGETS = git-status git-push git-commit-amend git-tag-list git-diff \
 here:
 	@echo $(HEREIAM)
 
-ssh-authorized-keys: $(SSHKEYLIST)
-	if [ -s "./$@" ]; then \
+ssh-public-keyring: $(SSHKEYLIST)
+	if [ -s "./$(SSHPUBKEYS)" ]; then \
 		for v in $(SSHKEYLIST); do \
-			grep `awk '{ print $$2 }' $$v` $@ || cat $$v >> $@ ;\
+			grep `awk '{ print $$2 }' $$v` $(SSHPUBKEYS) || cat $$v >> $(SSHPUBKEYS) ;\
 		done ;\
 	else \
-		cat $(SSHKEYLIST) > $@ ;\
+		cat $(SSHKEYLIST) > $(SSHPUBKEYS) ;\
 	fi
 
 diff-ssh-public-keys:
@@ -41,8 +41,8 @@ update-ssh-public-keys:
 	done
 
 deploy-ssh-public-key:
-	cat ssh-authorized-keys | \
-		ssh $(REMOTEHOST) "cat > $(HOMEDOTSSH)/$(SSHPUBKEYS) && chmod 600 $(HOMEDOTSSH)/$(SSHPUBKEYS)"
+	cat $(SSHPUBKEYS) | \
+		ssh $(REMOTEHOST) "cat > $(HOMEDOTSSH)/authorized_keys && chmod 600 $(HOMEDOTSSH)/authorized_keys"
 
 pgp-key-list:
 	gpg --list-keys
@@ -79,5 +79,5 @@ git-current-branch:
 
 
 distclean:
-	rm -f ./ssh-authorized-keys
+	rm -f ./$(SSHPUBKEYS)
 
